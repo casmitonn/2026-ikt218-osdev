@@ -3,6 +3,8 @@
 #include "libc/stdbool.h"
 #include <multiboot2.h>
 
+#include "vga.h"
+#include "../../gdt/gdt.h"
 #include "libc/string.h"
 
 
@@ -36,14 +38,11 @@ int main(uint32_t myStruct, uint32_t magic, struct multiboot_info* mb_info_addr)
     // Example to make assembly to C
      MyStruct* myStructPtr = (MyStruct*)myStruct; // liajdrroai
     
-    int noop = 0; // liajdrroaij
-    int res = compute(1,2); //rlgjwelrgj
 
-    // Display message on startup
-    //printf("Hello, World!\n");
-
-    //gdt_init(); // Initialize Global Descriptor Table
+    initGdt(); // Initialize Global Descriptor Table
     //ldt_init(); // Initialize Local Descriptor Table
+
+    print_string("Hello World", 0x0F); // Prints "Hello World" to the screen with white text on black background
 
 
     // Call cpp kernel_main (defined in kernel.cpp)

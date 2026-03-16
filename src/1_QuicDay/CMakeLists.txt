@@ -61,10 +61,13 @@ add_executable(uiaos-kernel
 	src/multiboot2.asm # TODO: Add multiboot2 support
     src/kernel.c
 	src/kernel.cpp
+	../gdt/gdt.c
+	../gdt/gdt.asm
+	src/vga/vga.c
 )
 
 # Include directories for the kernel target
-target_include_directories(uiaos-kernel PUBLIC include)
+target_include_directories(uiaos-kernel PUBLIC include src/vga src/gdt)
 
 
 # Specify compile options for C and C++

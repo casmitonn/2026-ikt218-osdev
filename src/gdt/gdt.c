@@ -1,29 +1,16 @@
 #include "libc/stdint.h"
+#include "gdt.h"
 
 #define GDT_ENTRIES 5
 
-// gdt.h
-struct gdt_entry {
-	uint16_t limit_low;
-	uint16_t base_low;
-	uint8_t base_middle;
-	uint8_t access;
-	uint8_t granularity;
-	uint8_t base_high;
-} __attribute__((packed));
 
-struct gdt_ptr {
-	uint16_t limit;
-	uint32_t base;
-} __attribute__((packed));
-
-void init_gdt(void);
+void initGdt(void);
 void gdt_load(struct gdt_ptr *gdt_ptr);
 void gdt_set_gate(int32_t num, uint32_t base, uint32_t limit, uint8_t access, uint8_t gran);
 struct gdt_entry gdt[GDT_ENTRIES];
 struct gdt_ptr gdt_ptr;
 
-void init_gdt(void) {
+void initGdt(void) {
 	// Set the GDT limit
 	gdt_ptr.limit = sizeof(struct gdt_entry) * GDT_ENTRIES - 1;
 	gdt_ptr.base = (uint32_t) &gdt;
