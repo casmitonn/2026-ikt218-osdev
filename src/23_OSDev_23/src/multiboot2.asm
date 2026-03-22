@@ -1,8 +1,10 @@
 extern main
-extern _gp     
+extern _gp
+extern idtp
 
 global _start
-global _gdt_flush    
+global _gdt_flush
+global _idt_flush
 
 section .multiboot_header
 header_start:
@@ -52,6 +54,10 @@ _gdt_flush:
     mov ss, ax
     jmp 0x08:flush2   
 flush2:
+    ret
+
+_idt_flush:
+    lidt [idtp]     ; Load the IDT register using our IDT pointer
     ret
 
 

@@ -1,6 +1,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "idt.h"
+#include "isr.h"
+#include "irq.h"
+#include "keyboard.h"
 
 /*------------------ GDT ------------------*/
 
@@ -152,7 +156,11 @@ void terminal_writestring(const char* data)
 
 void main(){
 	gdt_install();
-    terminal_initialize();           
+	idt_install();
+	isrs_install();
+	irq_install();
+    terminal_initialize();
+    keyboard_install();
 
 	terminal_writestring("           \xB2\xDB\xB2\n");
 	terminal_writestring("          \xB2\xDB\xDB\xDB\xB2\n");
@@ -171,5 +179,8 @@ void main(){
 	terminal_writestring(" ----------------------------------------------- \n");
 	terminal_writestring(" Hello, World!\n");
 	
+	/* Enable hardware interrupts */
+	asm volatile("sti");
+
     for(;;);
 }
