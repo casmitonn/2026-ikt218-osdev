@@ -64,12 +64,15 @@ add_executable(uiaos-kernel
 	src/kernel.cpp
 	../isr/isr.c
 	../isr/isr.asm
+	../irq/irq.c
+	../irq/irq.asm
 )
 
 # Include directories for the kernel target
 target_include_directories(uiaos-kernel PUBLIC
 	include
 	${CMAKE_CURRENT_SOURCE_DIR}/../isr
+	${CMAKE_CURRENT_SOURCE_DIR}/../irq
 )
 
 

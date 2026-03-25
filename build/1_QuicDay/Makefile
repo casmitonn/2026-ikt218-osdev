@@ -211,6 +211,38 @@ src/multiboot2.asm.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/uiaos-kernel.dir/build.make CMakeFiles/uiaos-kernel.dir/src/multiboot2.asm.o
 .PHONY : src/multiboot2.asm.o
 
+workspaces/2026-ikt218-osdev/src/irq/irq.o: workspaces/2026-ikt218-osdev/src/irq/irq.asm.o
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.o
+
+# target to build an object file
+workspaces/2026-ikt218-osdev/src/irq/irq.asm.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/uiaos-kernel.dir/build.make CMakeFiles/uiaos-kernel.dir/workspaces/2026-ikt218-osdev/src/irq/irq.asm.o
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.asm.o
+
+workspaces/2026-ikt218-osdev/src/irq/irq.o: workspaces/2026-ikt218-osdev/src/irq/irq.c.o
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.o
+
+# target to build an object file
+workspaces/2026-ikt218-osdev/src/irq/irq.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/uiaos-kernel.dir/build.make CMakeFiles/uiaos-kernel.dir/workspaces/2026-ikt218-osdev/src/irq/irq.c.o
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.c.o
+
+workspaces/2026-ikt218-osdev/src/irq/irq.i: workspaces/2026-ikt218-osdev/src/irq/irq.c.i
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.i
+
+# target to preprocess a source file
+workspaces/2026-ikt218-osdev/src/irq/irq.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/uiaos-kernel.dir/build.make CMakeFiles/uiaos-kernel.dir/workspaces/2026-ikt218-osdev/src/irq/irq.c.i
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.c.i
+
+workspaces/2026-ikt218-osdev/src/irq/irq.s: workspaces/2026-ikt218-osdev/src/irq/irq.c.s
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.s
+
+# target to generate assembly for a file
+workspaces/2026-ikt218-osdev/src/irq/irq.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/uiaos-kernel.dir/build.make CMakeFiles/uiaos-kernel.dir/workspaces/2026-ikt218-osdev/src/irq/irq.c.s
+.PHONY : workspaces/2026-ikt218-osdev/src/irq/irq.c.s
+
 workspaces/2026-ikt218-osdev/src/isr/isr.o: workspaces/2026-ikt218-osdev/src/isr/isr.asm.o
 .PHONY : workspaces/2026-ikt218-osdev/src/isr/isr.o
 
@@ -261,6 +293,10 @@ help:
 	@echo "... src/kernel.i"
 	@echo "... src/kernel.s"
 	@echo "... src/multiboot2.o"
+	@echo "... workspaces/2026-ikt218-osdev/src/irq/irq.o"
+	@echo "... workspaces/2026-ikt218-osdev/src/irq/irq.o"
+	@echo "... workspaces/2026-ikt218-osdev/src/irq/irq.i"
+	@echo "... workspaces/2026-ikt218-osdev/src/irq/irq.s"
 	@echo "... workspaces/2026-ikt218-osdev/src/isr/isr.o"
 	@echo "... workspaces/2026-ikt218-osdev/src/isr/isr.o"
 	@echo "... workspaces/2026-ikt218-osdev/src/isr/isr.i"

@@ -21,7 +21,6 @@ static void idt_set_entry(int vector, void (*isr)(void), uint8_t flags) {
 }
 
 void idt_init(void) {
-    // Zero out IDT if you want, or rely on BSS being zeroed
     for (int i = 0; i < 256; ++i) {
         idt[i].isr_low    = 0;
         idt[i].kernel_cs  = 0;

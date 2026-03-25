@@ -4,9 +4,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include "libc/stdint.h"
+
 //setter opp idt, registrerer isr-funksjonen og konfigurerer cpu-interrupts
 
 void isr_initialize(void);
+
+
+// IDT Management
+// Sett opp en IDT gate - gjør at en ISR/IRQ-vektor peker på en handler
+void idt_set_gate(uint8_t vector, void (*handler)(void));
 
 //kalt fra assembly
 
