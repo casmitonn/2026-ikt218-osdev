@@ -13,6 +13,7 @@ void timer_callback(struct registers *regs) {
     if (second_counter >= 18) {
         // Update Uptime
         second_counter = 0;
+        
     }
     
 }

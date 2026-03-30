@@ -53,14 +53,22 @@ void keyboard_handler(struct registers *r) {
     }
 
 
-    if (kbd_pos > 0) {
-                kbd_pos--;
-                kbd_buffer[kbd_pos] = 0;
-                
-                // 2. Tell the terminal to "visually" delete it
-                terminal_putchar('\b');
-            
-    } else if (ascii != 0) {
+    if (ascii == '\b') {
+        if (kbd_pos > 0) {
+            kbd_pos--;
+            kbd_buffer[kbd_pos] = '\0';
+            terminal_putchar('\b');
+        }
+    } else if (ascii == '\n') {
+        kbd_buffer[kbd_pos] = '\0';  // null-terminate
+        kbd_pos = 0;                 
+        terminal_putchar('\n');
+
+    }else if (ascii != 0) {
+        // Store in buffer AND echo to terminal
+        if (kbd_pos < 255) {                  // bounds check
+            kbd_buffer[kbd_pos++] = ascii;    // ← actually writes to buffer
+        }
         terminal_putchar(ascii);
     }
 }

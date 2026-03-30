@@ -24,7 +24,6 @@ extern void irq12();
 extern void irq13();
 extern void irq14();
 extern void irq15();
-// ... (Define others as you add them to your assembly file)
 
 void irq_install_handler(int irq, void (*handler)(struct registers *r)) {
     irq_routines[irq] = handler;

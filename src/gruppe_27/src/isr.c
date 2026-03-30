@@ -5,14 +5,13 @@
 extern void isr0();
 extern void isr1();
 extern void isr2();
-// ... add more as you create them
+
 
 void isr_install() {
     // Set up the exception gates (0-31)
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
     idt_set_gate(1, (uint32_t)isr1, 0x08, 0x8E);
     idt_set_gate(2, (uint32_t)isr2, 0x08, 0x8E);
-    // You can add idt_set_gate(3...31) here later
 }
 
 void isr_handler(struct registers r) {

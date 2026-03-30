@@ -27,4 +27,5 @@ void idt_init() {
 
     // Finally, load the IDT
     idt_load(&idtp);
+
 }

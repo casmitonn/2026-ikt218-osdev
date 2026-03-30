@@ -16,7 +16,6 @@ enable_interrupts:
     sti     ; Set Interrupt Flag
     ret
 
-
 %macro IRQ 2
   global irq%1
   irq%1:
