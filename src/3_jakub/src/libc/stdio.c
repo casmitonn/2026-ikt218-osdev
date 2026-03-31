@@ -166,6 +166,17 @@ void terminal_initialize(void)
     terminal_render_view();
 }
 
+void terminal_print_logo(void)
+{
+    printf("========================================\n");
+    printf("=                                      =\n");
+    printf("=                UIAOS                 =\n");
+    printf("=                                      =\n");
+    printf("=             uiaOS kernel             =\n");
+    printf("=                                      =\n");
+    printf("========================================\n");
+}
+
 void terminal_scroll_line_up(void)
 {
     if (terminal_view_top > 0) {

@@ -185,7 +185,7 @@ static void print_help(void)
 
 static void print_about(void)
 {
-    printf("UiAOS CLI\n");
+    terminal_print_logo();
     printf("Interrupts, paging, heap, PIT, keyboard history, scrollback\n");
     printf("History entries are stored on the heap.\n");
 }
