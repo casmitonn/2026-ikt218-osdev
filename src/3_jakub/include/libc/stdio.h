@@ -6,6 +6,13 @@ extern "C" {
 
 int putchar(int ic);
 int printf(const char *__restrict__ format, ...);
+void terminal_initialize(void);
+void terminal_scroll_line_up(void);
+void terminal_scroll_line_down(void);
+void terminal_scroll_page_up(void);
+void terminal_scroll_page_down(void);
+void terminal_scroll_to_top(void);
+void terminal_scroll_to_bottom(void);
 
 #ifdef __cplusplus
 }

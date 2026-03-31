@@ -20,14 +20,17 @@ int kernel_main();
 
 int main(uint32_t magic, struct multiboot_info *mb_info_addr)
 {
-    void *some_memory;
+    void *memory1;
     void *memory2;
     void *memory3;
     void *memory4;
+    int heap_ok;
     uint32_t busy_before;
     uint32_t busy_after;
     uint32_t interrupt_before;
     uint32_t interrupt_after;
+
+    terminal_initialize();
 
     (void)mb_info_addr;
 
@@ -57,33 +60,29 @@ int main(uint32_t magic, struct multiboot_info *mb_info_addr)
     asm volatile("sti");
 
     printf("Hello world!\n");
-    
-    // Test interrupt
-    printf("Triggering a test interrupt (INT 0x03)...\n");
-    asm volatile("int $0x03");
-    
-    printf("Interrupt test complete. Try typing on the keyboard!\n");
+    printf("Memory and PIT are ready.\n");
 
-    some_memory = malloc(12345);
+    memory1 = malloc(12345);
     memory2 = malloc(54321);
     memory3 = malloc(13331);
-
-    printf("malloc results: %d %d %d\n", some_memory != 0, memory2 != 0, memory3 != 0);
-    printf("malloc distinct: %d\n", some_memory != memory2 && memory2 != memory3 && some_memory != memory3);
-
     free(memory2);
     memory4 = malloc(4096);
-    printf("malloc reuse result: %d\n", memory4 != 0);
+
+    heap_ok = memory1 != 0 && memory2 != 0 && memory3 != 0 && memory4 != 0;
+    printf("Heap self-test: %d\n", heap_ok);
 
     busy_before = pit_get_ticks();
     sleep_busy(50);
     busy_after = pit_get_ticks();
-    printf("busy sleep ticks: %d\n", (int)(busy_after - busy_before));
 
     interrupt_before = pit_get_ticks();
     sleep_interrupt(50);
     interrupt_after = pit_get_ticks();
-    printf("interrupt sleep ticks: %d\n", (int)(interrupt_after - interrupt_before));
+    printf("PIT sleep ticks: %d %d\n",
+           (int)(busy_after - busy_before),
+           (int)(interrupt_after - interrupt_before));
+    printf("CLI ready. Type help.\n");
+    keyboard_print_prompt();
 
     // Call cpp kernel_main (defined in kernel.cpp)
     return kernel_main();
