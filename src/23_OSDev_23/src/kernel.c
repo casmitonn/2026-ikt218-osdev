@@ -5,6 +5,12 @@
 #include "isr.h"
 #include "irq.h"
 #include "keyboard.h"
+#include "memory.h"
+#include "paging.h"
+#include "pit.h"
+
+// This symbol is exported by arch/i386/linker.ld
+extern uint32_t end;
 
 /*------------------ GDT ------------------*/
 
@@ -44,9 +50,7 @@ void gdt_install(){
     _gp.base = (uint32_t)&gdt;
 
     gdt_set_gate(0, 0, 0, 0, 0);
-
     gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
-
     gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
 
     _gdt_flush();
@@ -131,7 +135,7 @@ void terminal_putchar(char c)
         terminal_column = 0;
         terminal_row++;
         if (terminal_row == VGA_HEIGHT)
-            terminal_row = 0; // eller scroll senere
+            terminal_row = 0;
         return;
     }
 	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
@@ -153,14 +157,82 @@ void terminal_writestring(const char* data)
 	terminal_write(data, strlen(data));
 }
 
+// Simple printf supporting %s, %d, %u, %x
+void printf(const char* fmt, ...) {
+    // Minimal varargs implementation
+    __builtin_va_list args;
+    __builtin_va_start(args, fmt);
+
+    char num_buf[12];
+
+    for (const char* p = fmt; *p; p++) {
+        if (*p != '%') {
+            terminal_putchar(*p);
+            continue;
+        }
+        p++;
+        if (*p == 'd' || *p == 'i') {
+            int val = __builtin_va_arg(args, int);
+            if (val < 0) { terminal_putchar('-'); val = -val; }
+            int i = 0;
+            if (val == 0) { num_buf[i++] = '0'; }
+            else { while (val > 0) { num_buf[i++] = '0' + (val % 10); val /= 10; } }
+            for (int j = i - 1; j >= 0; j--) terminal_putchar(num_buf[j]);
+        } else if (*p == 'u') {
+            unsigned int val = __builtin_va_arg(args, unsigned int);
+            int i = 0;
+            if (val == 0) { num_buf[i++] = '0'; }
+            else { while (val > 0) { num_buf[i++] = '0' + (val % 10); val /= 10; } }
+            for (int j = i - 1; j >= 0; j--) terminal_putchar(num_buf[j]);
+        } else if (*p == 's') {
+            const char* s = __builtin_va_arg(args, const char*);
+            terminal_writestring(s);
+        } else if (*p == 'x') {
+            unsigned int val = __builtin_va_arg(args, unsigned int);
+            terminal_writestring("0x");
+            int i = 0;
+            if (val == 0) { num_buf[i++] = '0'; }
+            else { while (val > 0) { int n = val & 0xF; num_buf[i++] = (n < 10) ? '0' + n : 'A' + n - 10; val >>= 4; } }
+            for (int j = i - 1; j >= 0; j--) terminal_putchar(num_buf[j]);
+        } else {
+            terminal_putchar('%');
+            terminal_putchar(*p);
+        }
+    }
+
+    __builtin_va_end(args);
+}
 
 void main(){
-	gdt_install();
-	idt_install();
-	isrs_install();
-	irq_install();
+    // Initialize the monitor (screen output)
     terminal_initialize();
+
+    // Initialize the Global Descriptor Table (GDT)
+    gdt_install();
+
+    // Initialize the Interrupt Descriptor Table (IDT)
+    idt_install();
+
+    // Initialize ISR exception handlers
+    isrs_install();
+
+    // Initialize hardware interrupts (IRQs)
+    irq_install();
+
+    // Initialize keyboard
     keyboard_install();
+
+    // Initialize the kernel's memory manager using the end address of the kernel
+    init_kernel_memory(&end); // <------ THIS IS PART OF THE ASSIGNMENT
+
+    // Initialize paging for memory management
+    init_paging(); // <------ THIS IS PART OF THE ASSIGNMENT
+
+    // Print memory information
+    print_memory_layout(); // <------ THIS IS PART OF THE ASSIGNMENT
+
+    // Initialize PIT
+    init_pit(); // <------ THIS IS PART OF THE ASSIGNMENT
 
 	terminal_writestring("           \xB2\xDB\xB2\n");
 	terminal_writestring("          \xB2\xDB\xDB\xDB\xB2\n");
@@ -178,9 +250,27 @@ void main(){
 	terminal_writestring("                \xB0\xB0\n");
 	terminal_writestring(" ----------------------------------------------- \n");
 	terminal_writestring(" Hello, World!\n");
-	
+
+    // Test malloc as the teacher's example shows
+    void* some_memory = malloc(12345);
+    void* memory2     = malloc(54321);
+    void* memory3     = malloc(13331);
+    (void)some_memory; (void)memory2; (void)memory3;
+
+    printf("Hello World!\n");
+
 	/* Enable hardware interrupts */
 	asm volatile("sti");
 
-    for(;;);
+    // Evaluation loop — demonstrates both sleep modes
+    int counter = 0;
+    while (true) {
+        printf("[%d]: Sleeping with busy-waiting (HIGH CPU).\n", counter);
+        sleep_busy(1000);
+        printf("[%d]: Slept using busy-waiting.\n", counter++);
+
+        printf("[%d]: Sleeping with interrupts (LOW CPU).\n", counter);
+        sleep_interrupt(1000);
+        printf("[%d]: Slept using interrupts.\n", counter++);
+    }
 }
