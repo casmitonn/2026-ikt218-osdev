@@ -82,6 +82,7 @@ add_executable(uiaos-kernel
 
     # PIT timer driver
     src/pit.c
+    src/song.c
 )
 # Include directories for the kernel target
 target_include_directories(uiaos-kernel PUBLIC include)
