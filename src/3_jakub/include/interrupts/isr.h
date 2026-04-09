@@ -3,6 +3,7 @@
 
 #include "libc/stdint.h"
 
+// ISRs (Interrupt Service Routines) and IRQs (Interrupt Requests) declarations
 #define IRQ0 32
 #define IRQ1 33
 #define IRQ2 34
@@ -21,16 +22,17 @@
 #define IRQ15 47
 
 // Struct which aggregates many registers
-typedef struct {
-   uint32_t ds;                  // Data segment selector
+typedef struct
+{
+   uint32_t ds;                                     // Data segment selector
    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by pusha.
-   uint32_t int_no, err_code;    // Interrupt number and error code (if applicable)
-   uint32_t eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
+   uint32_t int_no, err_code;                       // Interrupt number and error code (if applicable)
+   uint32_t eip, cs, eflags, useresp, ss;           // Pushed by the processor automatically.
 } registers_t;
 
 // Enables registration of callbacks for interrupts or IRQs.
 // For IRQs, the payload is IRQ# (e.g. 32 for IRQ0).
-typedef void (*isr_t)(registers_t*);
+typedef void (*isr_t)(registers_t *);
 void register_interrupt_handler(uint8_t n, isr_t handler);
 
 // Init functions
