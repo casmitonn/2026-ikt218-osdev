@@ -1,17 +1,32 @@
 #include "gdt.h"
+#include "idt.h"
+#include "isr.h"
+#include "irq.h"
+#include "keyboard.h"
+#include "screen.h"
 
 void kernel_main(void) {
-    unsigned short* video_memory = (unsigned short*) 0xB8000;
-    const char* message = "Hello World";
-
     gdt_install();
+    screen_clear();
 
-    int i = 0;
-    while (message[i] != '\0') {
-        video_memory[i] = (unsigned short)message[i] | (0x0F << 8);
-        i++;
-    }
+    screen_write("Hello World\n");
+
+    idt_install();
+    isr_install();
+    irq_install();
+    keyboard_install();
+
+    screen_write("Testing interrupts...\n");
+
+    __asm__ volatile ("int $0");
+    __asm__ volatile ("int $1");
+    __asm__ volatile ("int $2");
+
+    screen_write("Keyboard ready: ");
+
+    __asm__ volatile ("sti");
 
     while (1) {
+        __asm__ volatile ("hlt");
     }
 }
