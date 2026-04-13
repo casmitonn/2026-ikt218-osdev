@@ -62,6 +62,14 @@ add_executable(uiaos-kernel
     src/kernel.c
     src/gdt.c
     src/gdt_flush.asm
+    src/idt.c
+    src/idt_flush.asm
+    src/isr.asm
+    src/isr.c
+    src/irq.asm
+    src/irq.c
+    src/pic.c
+    src/keyboard.c
     src/terminal.c
 )
 
