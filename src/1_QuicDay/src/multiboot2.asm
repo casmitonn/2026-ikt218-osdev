@@ -69,6 +69,12 @@ _start:
 
     call main ; Jump main function
 
+; to keep the hello world text on the screen
+.hang:
+    cli
+    hlt
+    jmp .hang
+
 section .bss
 stack_bottom:
     resb 4096 * 16

@@ -22,10 +22,7 @@ void initGdt(void) {
 	gdt_set_gate(3, 0, 0xFFFFFFFF, 0xFA, 0xCF); // User mode code segment
 	gdt_set_gate(4, 0, 0xFFFFFFFF, 0xF2, 0xCF); // User mode data segment
 
-	// Load the GDT
-	gdt_load(&gdt_ptr);
-
-	// Flush GDT pointer
+	// Load the GDT and reload segment registers
 	gdt_flush((uint32_t)&gdt_ptr);
 }
 
