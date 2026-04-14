@@ -50,6 +50,31 @@ static const note_t fifth_crescendo[] = {
 
 };
 
+static const note_t norwegian_anthem[] = {
+  F4(1000), /* JA */ DS4(250), /* VI */ D4(500), /* EL- */ C4(500), /* SKER */
+  AS3(500), /* DE- */ C4(500), /* TTE */ D4(500), /* LAN-  */ DS4(500), /* DET */
+  F4(1000), /* SOM */ G4(250), /* DET */ F4(500), /* STI- */ DS4(500), /* GER */
+  D4(2000), /* FREM */
+
+  G4(1000), /* FUR- */ F4(250), /* ET */ DS4(500), /* VÆR- */ D4(500), /* BITT */
+  C4(500), /* OV- */ D4(500), /* ER */ DS4(500), /* VANN */
+  F4(1000), /* ET */ R(250), F4(1000), /* MED */ G4(250), /* DE */
+  G4(500), /* TU */ A4(500), /* SEN */ AS4(2000), /* HJEM */
+};
+
+static const note_t star_spangled_banner[] = {
+  F4( 300 ), D4(300), AS3(600),   // o o o
+  D4(600), F4(600), AS4(1200),      // can you see
+  D5(600), C5(150), AS4(900),      //
+  D4(600), E4(600), F4(1200),
+  F4(300), F4(300), D5(1200), C5(300), AS4(600), A4(1200),
+  G4(300), A4(300), AS4(600), AS4(600),
+  F4(600), D4(600), AS3(600),
+  F4(450), D4(150), AS3(600), D4(600), F4(600), AS4(1200),
+  D5(450), C5(150), AS4(600),
+  D4(600), E4(600), F4(2400), // enough i think
+};
+
 
 typedef struct {
   const char* name;
@@ -59,10 +84,12 @@ typedef struct {
 
 
 static const song_t songs[] = {
-    {        "twinkle", song_twinkle_twinkle, sizeof(song_twinkle_twinkle) / sizeof(note_t)},
-    {     "ode_to_joy",      song_ode_to_joy,      sizeof(song_ode_to_joy) / sizeof(note_t)},
-    {          "scale",           song_scale,           sizeof(song_scale) / sizeof(note_t)},
-    {"fifth_crescendo",      fifth_crescendo,      sizeof(fifth_crescendo) / sizeof(note_t)},
+  {"twinkle", song_twinkle_twinkle, sizeof(song_twinkle_twinkle) / sizeof(note_t)},
+  {"ode_to_joy", song_ode_to_joy, sizeof(song_ode_to_joy) / sizeof(note_t)},
+  {"scale", song_scale, sizeof(song_scale) / sizeof(note_t)},
+  {"fifth_crescendo", fifth_crescendo, sizeof(fifth_crescendo) / sizeof(note_t)},
+  {"norway", norwegian_anthem, sizeof(norwegian_anthem) / sizeof(note_t)},
+  {"usa", star_spangled_banner, sizeof(star_spangled_banner) / sizeof(note_t)},
 };
 
 #define NUM_SONGS (sizeof(songs) / sizeof(songs[0]))
