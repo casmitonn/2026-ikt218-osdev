@@ -3,6 +3,9 @@
 #include "gdt.h"
 #include "idt.h"
 #include "pic.h"
+#include "memory.h"
+
+extern uint32_t end;
 
 void kmain(uint32_t magic, void* mb_info_addr) {
     (void)magic;
@@ -16,14 +19,17 @@ void kmain(uint32_t magic, void* mb_info_addr) {
 
     terminal_print_string("Hello World\n");
 
-    /* Test software interrupts */
-    __asm__ __volatile__("int $0");
-    __asm__ __volatile__("int $1");
-    __asm__ __volatile__("int $2");
+    init_kernel_memory(&end);
+    init_paging();
+    print_memory_layout();
 
-    terminal_print_string("Starting handling interrupts...\n");
+    void* test1 = malloc(1000);
+    void* test2 = malloc(2000);
+    (void)test1;
+    (void)test2;
 
-    /* Enable hardware interrupts */
+    terminal_print_string("Keyboard logger ready:\n");
+
     __asm__ __volatile__("sti");
 
     while (1) {
