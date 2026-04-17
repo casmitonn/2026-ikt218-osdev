@@ -1,8 +1,9 @@
 #include <boot/multiboot2.h>
 #include <drivers/audio/PCSPK.h>
-#include <kernel/memory.h>
+#include <kernel/paging.h>
 #include <kernel/panic.h>
 #include <kernel/pit.h>
+#include <kernel/pmm.h>
 #include <kernel/util.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -21,8 +22,7 @@
 #include "shell/shell.h"
 
 
-struct multiboot_info;
-extern uint32_t end; // defined in arch/i386/linker.ld
+extern uint32_t end;
 
 void kernel_main(uint32_t magic, void* addr);
 
@@ -186,7 +186,6 @@ void kernel_main(uint32_t magic, void* addr) {
   vga_text_initialise();
   log_init();
 
-
   log_info("Initializing Group_42 Kernel...\n");
 
   log_info("TSC: 0x%llx (%llu cycles)\n", rdtsc(), rdtsc());
@@ -194,43 +193,22 @@ void kernel_main(uint32_t magic, void* addr) {
   if (magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
     kernel_panic("Invalid magic number 0x%x. Expected 0x%x\n", magic, MULTIBOOT2_BOOTLOADER_MAGIC);
   }
+
   init_gdt();
   init_idt();
   keyboard_set_scancode_set2();
 
-  init_mm(&end);
-  init_paging();
-
-  // PIT is initialized by init_idt();
-
-  log_info("Memory layout before malloc.\n");
-  print_memory_layout();
-
-  int* array = (int*)alloc_page();
-  if (!array) {
-    kernel_panic("Malloc failed!");
-  }
-  memset(array, 'a', sizeof(int) * 100);
-
-  for (size_t i = 0; i < 100; i++) {
-    printf("%c ", array[i]);
-  }
-
-  putchar('\n');
-  log_info("Memory layout after malloc.\n");
-  print_memory_layout();
-
-  free_page(array);
-  log_info("Memory layout after free.\n");
-  print_memory_layout();
-
-  // test memory
-  // TODO: make this work with new MM
+  pmm_init(addr);
+  init_paging(addr);
+  init_tss();
   init_syscalls();
 
-  // initialize speaker
-  PCSPK_init();
+  log_info("PMM: %d free frames (%d KB)\n", pmm_get_free_count(), pmm_get_free_count() * 4);
 
+  printf("Testing page fault handler...\n");
+  uint32_t* test = (uint32_t*)0x10000;
+  *test = 42;
+  printf("Write to 0x10000 succeeded: %d\n", *test);
   log_set_min_level(3);
   vfs_init();
   ramfs_init("/");
@@ -239,6 +217,11 @@ void kernel_main(uint32_t magic, void* addr) {
 
   log_info("Starting shell...\n");
 
+  printf("\nInitializing shell...\n");
+  vga_text_enable_debug_serial(true);
   shell_init();
+  printf("Starting shell...\n\n");
   shell_run();
+
+  __asm__ volatile("hlt");
 }

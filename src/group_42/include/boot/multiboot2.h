@@ -94,6 +94,8 @@ typedef unsigned short          multiboot_uint16_t;
 typedef unsigned int            multiboot_uint32_t;
 typedef unsigned long long      multiboot_uint64_t;
 
+struct multiboot_info;
+
 struct multiboot_header
 {
   /*  Must be MULTIBOOT_MAGIC - see above. */
@@ -245,7 +247,7 @@ struct multiboot_tag_mmap
   multiboot_uint32_t size;
   multiboot_uint32_t entry_size;
   multiboot_uint32_t entry_version;
-  struct multiboot_mmap_entry entries[0];  
+  multiboot_uint8_t entries[0];
 };
 
 struct multiboot_vbe_info_block

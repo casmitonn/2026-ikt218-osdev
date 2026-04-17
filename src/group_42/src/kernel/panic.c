@@ -4,8 +4,6 @@
 
 
 void kernel_panic_impl(const char* file, int line, const char* fmt, ...) {
-  vga_text_clear_screen();
-
   // Log location via logger (if still functional)
   log_printf(LOG_LEVEL_FATAL, LOG_SUBSYS_PANIC, "Panic in %s:%d\n", file, line);
   va_list ap;

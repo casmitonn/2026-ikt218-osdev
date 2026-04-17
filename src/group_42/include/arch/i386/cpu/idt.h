@@ -27,9 +27,8 @@ typedef struct __attribute__((packed)) {
 } idtr_t;
 
 
-static idt_gate_t idt[IDT_ENTRIES];
-
-static idtr_t idt_reg;
+extern idt_gate_t idt[IDT_ENTRIES];
+extern idtr_t idt_reg;
 
 
 /**
@@ -43,3 +42,4 @@ void init_idt();
  * @param handler handler to set
  */
 void set_idt_gate(int n, uint32_t handler);
+void set_idt_gate_with_attrs(int n, uint32_t handler, uint8_t attrs);

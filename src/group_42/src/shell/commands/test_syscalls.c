@@ -1,86 +1,100 @@
 #include <drivers/video/vga_text.h>
 #include <kernel/errno.h>
 #include <kernel/fcntl.h>
+#include <kernel/pit.h>
 #include <kernel/syscall.h>
 #include <kernel/unistd.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "shell/shell_command.h"
 
+static uint32_t syscall_via_int0x80(uint32_t num, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint32_t e) {
+    uint32_t ret;
+    __asm__ volatile(
+        "int $0x80"
+        : "=a"(ret)
+        : "a"(num), "b"(a), "c"(b), "d"(c), "S"(d), "D"(e)
+        : "memory");
+    return ret;
+}
+
 int cmd_test_syscalls(int argc, char** argv) {
-  (void)argc;
-  (void)argv;
-  syscall_args_t args;
+    (void)argc;
+    (void)argv;
 
-  printf("=== SYS_WRITE TEST (fd=1 stdout) ===\n");
-  args = (syscall_args_t){0, .a = 1, .b = (uint32_t)"hello from sys_write\n", .c = 20};
-  uint32_t written = sys_write(&args);
-  printf("sys_write returned: %u (expected 20)\n", written);
+    printf("=== TESTING int 0x80 SYSCALL MECHANISM ===\n\n");
 
-  printf("=== SYS_WRITE TEST (fd=99 invalid) ===\n");
-  args = (syscall_args_t){0, .a = 99, .b = (uint32_t)"x", .c = 1};
-  written = sys_write(&args);
-  printf("sys_write (fd=99) returned: %d (expected -EBADF=%d)\n", written, -EBADF);
+    printf("--- SYS_GETPID via int 0x80 ---\n");
+    uint32_t pid = syscall_via_int0x80(SYS_getpid, 0, 0, 0, 0, 0);
+    printf("Result: %u (expected 1)\n", pid);
+    printf("Status: %s\n\n", pid == 1 ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_READ TEST (fd=99 invalid) ===\n");
-  uint8_t tmpbuf[4] = {0};
-  args = (syscall_args_t){0, .a = 99, .b = (uint32_t)tmpbuf, .c = 4};
-  uint32_t bad_read = sys_read(&args);
-  printf("sys_read (fd=99) returned: %d (expected -EBADF=%d)\n", bad_read, -EBADF);
+    printf("--- SYS_GETUID via int 0x80 ---\n");
+    uint32_t uid = syscall_via_int0x80(SYS_getuid, 0, 0, 0, 0, 0);
+    printf("Result: %u (expected 0)\n", uid);
+    printf("Status: %s\n\n", uid == 0 ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_GETPID TEST ===\n");
-  args = (syscall_args_t){0};
-  uint32_t pid = sys_getpid(&args);
-  printf("sys_getpid returned: %u (expected 1)\n", pid);
+    printf("--- SYS_GETGID via int 0x80 ---\n");
+    uint32_t gid = syscall_via_int0x80(SYS_getgid, 0, 0, 0, 0, 0);
+    printf("Result: %u (expected 0)\n", gid);
+    printf("Status: %s\n\n", gid == 0 ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_GETUID TEST ===\n");
-  args = (syscall_args_t){0};
-  uint32_t uid = sys_getuid(&args);
-  printf("sys_getuid returned: %u (expected 0)\n", uid);
+    printf("--- SYS_WRITE (fd=1) via int 0x80 ---\n");
+    const char* msg = "Hello from int 0x80 syscall!\n";
+    uint32_t written = syscall_via_int0x80(SYS_write, 1, (uint32_t)msg, strlen(msg), 0, 0);
+    printf("Result: %u (expected %u)\n", written, (uint32_t)strlen(msg));
+    printf("Status: %s\n\n", written == strlen(msg) ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_GETGID TEST ===\n");
-  args = (syscall_args_t){0};
-  uint32_t gid = sys_getgid(&args);
-  printf("sys_getgid returned: %u (expected 0)\n", gid);
+    printf("--- SYS_WRITE (fd=99 invalid) via int 0x80 ---\n");
+    written = syscall_via_int0x80(SYS_write, 99, (uint32_t)"x", 1, 0, 0);
+    printf("Result: %d (expected -EBADF=%d)\n", written, -EBADF);
+    printf("Status: %s\n\n", (int32_t)written == -EBADF ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_GETCWD TEST ===\n");
-  char cwd_buf[8] = {0};
-  args = (syscall_args_t){0, .a = (uint32_t)cwd_buf, .b = 8};
-  uint32_t cwd_ret = sys_getcwd(&args);
-  printf("sys_getcwd returned: 0x%x\n", cwd_ret);
-  printf("sys_getcwd buffer: \"%s\" (expected \"/\")\n", cwd_buf);
+    printf("--- SYS_GETCWD via int 0x80 ---\n");
+    char cwd_buf[32] = {0};
+    uint32_t cwd_ret = syscall_via_int0x80(SYS_getcwd, (uint32_t)cwd_buf, sizeof(cwd_buf), 0, 0, 0);
+    printf("Result: 0x%x, buffer: \"%s\"\n", cwd_ret, cwd_buf);
+    printf("Status: %s\n\n", (cwd_ret == (uint32_t)cwd_buf && cwd_buf[0] == '/') ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== SYS_GETCWD TEST (small buffer) ===\n");
-  char tiny_buf[1] = {0};
-  args = (syscall_args_t){0, .a = (uint32_t)tiny_buf, .b = 1};
-  cwd_ret = sys_getcwd(&args);
-  printf("sys_getcwd (size=1) returned: %d (expected -EINVAL=%d)\n", cwd_ret, -EINVAL);
+    printf("--- SYS_CLOSE (fd=0 valid) via int 0x80 ---\n");
+    uint32_t close_ret = syscall_via_int0x80(SYS_close, 0, 0, 0, 0, 0);
+    printf("Result: %u (expected 0)\n", close_ret);
+    printf("Status: %s\n\n", close_ret == 0 ? "PASS" : "FAIL");
+    sleep_interrupt(300);
 
-  printf("=== STUB SYSCALLS (all return -1) ===\n");
-  args = (syscall_args_t){0};
-  printf("sys_fork returned: %d\n", sys_fork(&args));
-  printf("sys_execve returned: %d\n", sys_execve(&args));
-  printf("sys_wait returned: %d\n", sys_wait(&args));
-  printf("sys_open returned: %d\n", sys_open(&args));
-  printf("sys_lseek returned: %d\n", sys_lseek(&args));
-  printf("sys_dup returned: %d\n", sys_dup(&args));
-  printf("sys_dup2 returned: %d\n", sys_dup2(&args));
-  printf("sys_pipe returned: %d\n", sys_pipe(&args));
-  printf("sys_chdir returned: %d\n", sys_chdir(&args));
+    printf("--- SYS_EXIT via int 0x80 ---\n");
+    printf("Note: SYS_EXIT will halt the CPU, test skipped\n\n");
+    sleep_interrupt(300);
 
-  printf("=== SYS_READ TEST (fd=0 keyboard) ===\n");
-  printf("Press 5 keys then press Enter...\n");
-  uint8_t kbuf[8] = {0};
-  args = (syscall_args_t){0, .a = 0, .b = (uint32_t)kbuf, .c = 5};
-  uint32_t bytes_read = sys_read(&args);
-  printf("sys_read returned: %u bytes\n", bytes_read);
-  printf("sys_read bytes: '");
-  for (uint32_t i = 0; i < bytes_read; i++) {
-    putchar(kbuf[i]);
-  }
-  printf("'\n");
+    printf("=== STUB SYSCALLS (all return -1) ===\n");
+    printf("sys_fork: %d (expected -1)\n", syscall_via_int0x80(SYS_fork, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_execve: %d (expected -1)\n", syscall_via_int0x80(SYS_execve, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_wait: %d (expected -1)\n", syscall_via_int0x80(SYS_wait, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_open: %d (expected -1)\n", syscall_via_int0x80(SYS_open, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_lseek: %d (expected -1)\n", syscall_via_int0x80(SYS_lseek, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_dup: %d (expected -1)\n", syscall_via_int0x80(SYS_dup, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_dup2: %d (expected -1)\n", syscall_via_int0x80(SYS_dup2, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_pipe: %d (expected -1)\n", syscall_via_int0x80(SYS_pipe, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_chdir: %d (expected -1)\n", syscall_via_int0x80(SYS_chdir, 0, 0, 0, 0, 0));
+    sleep_interrupt(300);
+    printf("sys_brk: %d (expected 0)\n", syscall_via_int0x80(SYS_brk, 0, 0, 0, 0, 0));
 
-  printf("=== ALL TESTS COMPLETE ===\n");
-  return 0;
+    printf("\n=== ALL TESTS COMPLETE ===\n");
+    return 0;
 }

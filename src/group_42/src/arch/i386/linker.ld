@@ -5,29 +5,36 @@ SECTIONS {
 
     .boot :
     {
-        /* Ensure that the multiboot header is at the beginning! */
         *(.multiboot_header)
     }
 
-    . = ALIGN(4K);
+    .page_dir 0x00104000 :
+    {
+        _page_dir = .;
+        . = . + 4096;
+    }
+
+    .page_tables 0x00108000 :
+    {
+        _page_tables = .;
+        . = . + 8192;
+    }
+
     .text :
     {
         *(.text .text.*)
     }
 
-    . = ALIGN(4K);
     .rodata :
     {
         *(.rodata .rodata.*)
     }
 
-    . = ALIGN(4K);
     .data :
     {
         *(.data .data.*)
     }
 
-    . = ALIGN(4K);
     .bss :
     {
         *(.bss .bss.*)

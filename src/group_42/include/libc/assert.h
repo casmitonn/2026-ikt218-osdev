@@ -15,7 +15,7 @@
   do {                                                                          \
     if (!(x)) {                                                                 \
       fprintf(stderr, "Assert '%s' failed at %s:%d\n", #x, __FILE__, __LINE__); \
-      *(volatile int*)0 = 0;                                                    \
+      __asm__ volatile("hlt");                                                  \
     }                                                                           \
   } while (0)
 #endif

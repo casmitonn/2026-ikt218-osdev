@@ -315,20 +315,21 @@ static void syscall_register(uint32_t num, syscall_fn_t fn) {
  * Called from the 0x80 ISR stub in interrupts.asm.
  */
 void syscall_handler(registers_t* regs) {
+  uint32_t snum = regs->eax;
+
   syscall_args_t args;
-  args.number = regs->eax;
+  args.number = snum;
   args.a = regs->ebx;
   args.b = regs->ecx;
   args.c = regs->edx;
   args.d = regs->esi;
   args.e = regs->edi;
-  args.f = regs->ebp;
+  args.f = regs->esp_pusha;
 
   uint32_t result = -1;
-  uint32_t num = args.number;
 
-  if (num < MAX_SYSCALLS && syscall_table[num] != NULL) {
-    result = ((syscall_fn_t)syscall_table[num])(&args);
+  if (snum < MAX_SYSCALLS && syscall_table[snum] != NULL) {
+    result = ((syscall_fn_t)syscall_table[snum])(&args);
   }
 
   regs->eax = result;

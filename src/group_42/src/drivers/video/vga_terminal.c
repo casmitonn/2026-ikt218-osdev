@@ -9,6 +9,15 @@ static size_t text_row;
 static size_t text_column;
 static uint8_t text_color;
 static uint16_t* text_buffer = (uint16_t*)VGA_TEXT_MEMORY;
+static bool vga_debug_serial = false;
+
+void vga_text_enable_debug_serial(bool enable) {
+    vga_debug_serial = enable;
+}
+
+static void serial_putchar(char c) {
+    port_byte_out(0xE9, (uint8_t)c);
+}
 
 static uint16_t vga_entry(char uc, uint8_t color) {
   return (uint16_t)uc | (uint16_t)color << 8;
@@ -44,6 +53,9 @@ void vga_text_putentryat(char c, uint8_t color, size_t x, size_t y) {
 #define VTAB_WIDTH 4
 
 void vga_text_putchar(char c) {
+  if (vga_debug_serial) {
+    serial_putchar(c);
+  }
   switch (c) {
     case '\n': {
       const size_t index = text_row * VGA_TEXT_WIDTH + text_column;

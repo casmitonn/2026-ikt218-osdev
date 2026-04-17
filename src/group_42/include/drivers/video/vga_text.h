@@ -1,5 +1,6 @@
 #pragma once
 #include "libc/stdint.h"
+#include <stdbool.h>
 
 enum vga_text_color {
   VGA_COLOR_BLACK = 0,
@@ -93,5 +94,10 @@ void vga_text_get_cursor_position(size_t* x, size_t* y);
  * Disable the hardware cursor
  */
 void vga_text_disable_cursor();
+
+/**
+ * Enable debug mode - copies all VGA output to serial port 0xE9
+ */
+void vga_text_enable_debug_serial(bool enable);
 
 #define vga_text_entry_color(fg, bg) (fg | bg << 3)

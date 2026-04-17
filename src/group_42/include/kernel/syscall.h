@@ -13,20 +13,20 @@
 #define SYS_write 4
 #define SYS_open 5
 #define SYS_close 6
-#define SYS_wait 7
+#define SYS_wait 12
 #define SYS_execve 11
-#define SYS_chdir 12
-#define SYS_getcwd 183
-#define SYS_dup 41
-#define SYS_dup2 63
+#define SYS_chdir 15
+#define SYS_getcwd 17
+#define SYS_dup 19
+#define SYS_dup2 21
 #define SYS_pipe 42
 #define SYS_brk 45
-#define SYS_lseek 19
+#define SYS_lseek 60
 #define SYS_getpid 20
-#define SYS_getuid 24
-#define SYS_getgid 47
+#define SYS_getuid 61
+#define SYS_getgid 62
 
-#define MAX_SYSCALLS 224
+#define MAX_SYSCALLS 64
 
 /**
  *Syscall arguments

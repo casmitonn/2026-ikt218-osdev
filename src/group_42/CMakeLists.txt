@@ -69,8 +69,6 @@ add_executable(group_42-kernel
         src/kernel/util.c
         src/kernel/syscall.c
         src/kernel/util/ring_buffer8.c
-        src/kernel/filesystem/vfs.c
-        src/kernel/filesystem/ramfs.c
 
         src/boot/multiboot2.asm
 
@@ -112,9 +110,14 @@ add_executable(group_42-kernel
         src/arch/i386/cpu/interrupts.asm
         src/arch/i386/cpu/isr.c
         src/arch/i386/cpu/ports.c
+        src/arch/i386/cpu/tss.c
+        src/arch/i386/cpu/paging_asm.asm
         src/kernel/log.c
         src/kernel/panic.c
         src/libc/stdlib.c
+        src/kernel/pmm.c
+        src/kernel/paging.c
+        src/kernel/page_fault.c
         src/kernel/memory.c
         src/kernel/pit.c
         src/drivers/audio/PCSPK.c
@@ -131,12 +134,12 @@ target_include_directories(group_42-kernel PUBLIC include include/libc)
 
 # Specify compile options for C and C++
 target_compile_options(group_42-kernel PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:-Wall -Wextra -Werror -nostdinc -std=c11 -ffreestanding -Wno-unused-variable -Wno-unused-parameter -nostdlib -fno-builtin -fno-stack-protector -fno-stack-check -fno-lto -fPIE -m32 -march=i386 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -Wno-main -g>
+        $<$<COMPILE_LANGUAGE:C>:-Wall -Wextra -Werror -nostdinc -std=c11 -ffreestanding -Wno-unused-variable -Wno-unused-parameter -nostdlib -fno-builtin -fno-stack-protector -fno-stack-check -fno-lto -m32 -march=i386 -mno-mmx -mno-sse -mno-sse2 -mno-red-zone -Wno-main -g>
 )
 
 # Specify link options for C and C++
 target_link_options(group_42-kernel PUBLIC
-        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>: -ffreestanding -nostdinc -nostdlib -fno-builtin -static -pie -O0 -T${OS_KERNEL_LINKER} -g>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>: -ffreestanding -nostdinc -nostdlib -fno-builtin -static -O0 -T${OS_KERNEL_LINKER} -g>
 )
 
 target_compile_definitions(group_42-kernel PRIVATE
@@ -150,7 +153,6 @@ target_link_options(
         PUBLIC "-ffreestanding"
         PUBLIC "-nostdlib"
         PUBLIC "-static"
-        PUBLIC "-pie"
         PUBLIC "-T${OS_KERNEL_LINKER}"
 )
 
