@@ -128,7 +128,7 @@ static void show_boot_screen(void) {
         "|_| |_|\\___|_|_|\\___/     \\_/\\_/ \\___/|_|  |_|\\__,_(_)",
         "",
         "IKT218-G Advanced Operating Systems",
-        "solo_fishstocks",
+        "OSdev_100",
         "",
         "Press Enter to continue"
     };
