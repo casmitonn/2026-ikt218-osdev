@@ -3,13 +3,7 @@
 #include "libc/stdint.h"
 #include "libc/stddef.h"
 
-/*
- * VGA text-mode colour palette (16 colours).
- *
- * The attribute byte written to VGA memory encodes:
- *   bits 3-0  foreground colour
- *   bits 7-4  background colour
- */
+
 typedef enum {
     VGA_COLOR_BLACK         = 0,
     VGA_COLOR_BLUE          = 1,
@@ -46,3 +40,17 @@ void terminal_writestring(const char* str);
 
 /* Minimal printf - supports: %c %s %d %u %x %% */
 void printf(const char* fmt, ...);
+
+/* -----------------------------------------------------------------
+ * Positioned drawing functions (added for Assignment 6 splash)
+ * ----------------------------------------------------------------- */
+
+/* Draw a single character at (x, y) with specific fg/bg colours */
+void putCharAt(uint16_t x, uint16_t y, char c, uint8_t fg, uint8_t bg);
+
+/* Fill the entire screen with spaces using the given fg/bg colours */
+void fillScreen(uint8_t fg, uint8_t bg);
+
+/* Screen dimensions */
+uint16_t getScreenWidth(void);
+uint16_t getScreenHeight(void);

@@ -3,33 +3,17 @@
 
 /*
  * terminal.c - VGA text-mode terminal driver
- *
- * VGA text mode uses a memory-mapped framebuffer starting at physical
- * address 0xB8000.  Each character cell occupies 2 bytes:
- *   byte 0 - ASCII character code
- *   byte 1 - attribute byte  (bits 7-4 = background colour, bits 3-0 = foreground)
- *
- * The standard text screen is 80 columns × 25 rows = 2 000 cells = 4 000 bytes.
  */
 
 #define VGA_WIDTH  80
 #define VGA_HEIGHT 25
 
-/* Physical address of the VGA text-mode framebuffer */
 #define VGA_MEMORY ((uint16_t*)0xB8000)
 
-/* -------------------------------------------------------------------------
- * Module-private state
- * ---------------------------------------------------------------------- */
-
-static size_t   terminal_row;    /* Current cursor row    (0 = top)  */
-static size_t   terminal_col;    /* Current cursor column (0 = left) */
-static uint8_t  terminal_color;  /* Current attribute byte            */
-static uint16_t *terminal_buffer;/* Pointer to VGA framebuffer        */
-
-/* -------------------------------------------------------------------------
- * Helper: pack character + attribute into a 16-bit VGA cell
- * ---------------------------------------------------------------------- */
+static size_t   terminal_row;
+static size_t   terminal_col;
+static uint8_t  terminal_color;
+static uint16_t *terminal_buffer;
 
 uint8_t vga_entry_color(vga_color fg, vga_color bg)
 {
@@ -41,11 +25,6 @@ static uint16_t vga_entry(unsigned char c, uint8_t color)
     return (uint16_t)c | ((uint16_t)color << 8);
 }
 
-/* -------------------------------------------------------------------------
- * Scroll the terminal up by one row
- *
- * Every row is copied to the row above it; the last row is cleared.
- * ---------------------------------------------------------------------- */
 static void terminal_scroll(void)
 {
     for (size_t y = 1; y < VGA_HEIGHT; y++) {
@@ -55,7 +34,6 @@ static void terminal_scroll(void)
         }
     }
 
-    /* Blank the newly exposed bottom row */
     for (size_t x = 0; x < VGA_WIDTH; x++) {
         terminal_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH + x] =
             vga_entry(' ', terminal_color);
@@ -64,10 +42,6 @@ static void terminal_scroll(void)
     terminal_row = VGA_HEIGHT - 1;
 }
 
-/* -------------------------------------------------------------------------
- * Public API
- * ---------------------------------------------------------------------- */
-
 void terminal_initialize(void)
 {
     terminal_row    = 0;
@@ -75,7 +49,6 @@ void terminal_initialize(void)
     terminal_color  = vga_entry_color(VGA_COLOR_LIGHT_GREY, VGA_COLOR_BLACK);
     terminal_buffer = VGA_MEMORY;
 
-    /* Fill every cell with a space in the current colour to clear the screen */
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             terminal_buffer[y * VGA_WIDTH + x] = vga_entry(' ', terminal_color);
@@ -125,19 +98,6 @@ void terminal_writestring(const char* str)
     }
 }
 
-/* -------------------------------------------------------------------------
- * printf - minimal formatted output
- *
- * Supported conversion specifiers:
- *   %c   - single character
- *   %s   - null-terminated string
- *   %d   - signed 32-bit decimal integer
- *   %u   - unsigned 32-bit decimal integer
- *   %x   - unsigned 32-bit hexadecimal (lowercase, no leading zeros)
- *   %%   - literal percent sign
- * ---------------------------------------------------------------------- */
-
-/* Write an unsigned integer in the given base (2-16) */
 static void print_uint(uint32_t value, uint32_t base)
 {
     static const char digits[] = "0123456789abcdef";
@@ -149,13 +109,11 @@ static void print_uint(uint32_t value, uint32_t base)
         return;
     }
 
-    /* Build the digit string in reverse order */
     while (value > 0) {
         buf[pos++] = digits[value % base];
         value /= base;
     }
 
-    /* Print in correct (forward) order */
     while (pos > 0) {
         terminal_putchar(buf[--pos]);
     }
@@ -172,7 +130,6 @@ void printf(const char* fmt, ...)
             continue;
         }
 
-        /* Consume the '%' and look at the next character */
         i++;
         switch (fmt[i]) {
             case 'c':
@@ -189,7 +146,6 @@ void printf(const char* fmt, ...)
                 int32_t val = va_arg(args, int32_t);
                 if (val < 0) {
                     terminal_putchar('-');
-                    /* Cast to uint32_t to handle INT32_MIN correctly */
                     print_uint((uint32_t)(-val), 10);
                 } else {
                     print_uint((uint32_t)val, 10);
@@ -210,7 +166,6 @@ void printf(const char* fmt, ...)
                 break;
 
             default:
-                /* Unknown specifier: print literally */
                 terminal_putchar('%');
                 terminal_putchar(fmt[i]);
                 break;
@@ -219,3 +174,32 @@ void printf(const char* fmt, ...)
 
     va_end(args);
 }
+
+/* -------------------------------------------------------------------------
+ * Positioned drawing functions (added for Assignment 6 splash screen)
+ * ---------------------------------------------------------------------- */
+
+/* Draw a single character at (x, y) with specific fg/bg colours */
+void putCharAt(uint16_t x, uint16_t y, char c, uint8_t fg, uint8_t bg)
+{
+    if (x >= VGA_WIDTH || y >= VGA_HEIGHT) return;
+
+    uint8_t attr = (uint8_t)((fg & 0x0F) | ((bg & 0x0F) << 4));
+    VGA_MEMORY[y * VGA_WIDTH + x] = vga_entry((unsigned char)c, attr);
+}
+
+/* Fill the entire screen with spaces using the given fg/bg colours */
+void fillScreen(uint8_t fg, uint8_t bg)
+{
+    uint8_t attr = (uint8_t)((fg & 0x0F) | ((bg & 0x0F) << 4));
+    for (size_t y = 0; y < VGA_HEIGHT; y++) {
+        for (size_t x = 0; x < VGA_WIDTH; x++) {
+            VGA_MEMORY[y * VGA_WIDTH + x] = vga_entry(' ', attr);
+        }
+    }
+    terminal_row = 0;
+    terminal_col = 0;
+}
+
+uint16_t getScreenWidth(void)  { return VGA_WIDTH;  }
+uint16_t getScreenHeight(void) { return VGA_HEIGHT; }
