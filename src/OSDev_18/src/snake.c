@@ -310,6 +310,8 @@ void DrawBoard(struct GameState* game) {
     TerminalWriteString("Score: ");
     TerminalWriteUInt(game->score);
     TerminalPutChar('\n');
+
+    TerminalWriteString("Press q to exit\n");
 }
 
 void PlayGame(void) {

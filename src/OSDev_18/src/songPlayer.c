@@ -37,10 +37,10 @@ void PlaySongImpl(Song* song) {
 
         if (currentNote.frequency == R) {
             StopSound();
-            SleepInterrupt(currentNote.duration * 2); // *2 is a forced delay, added because QEMU struggles with frequencies switching fast
+            SleepInterrupt(currentNote.duration);
         } else {
             PlaySound(currentNote.frequency);
-            SleepInterrupt(currentNote.duration * 2); // *2 is a forced delay, added because QEMU struggles with frequencies switching fast
+            SleepInterrupt(currentNote.duration);
             StopSound();
         }
     }

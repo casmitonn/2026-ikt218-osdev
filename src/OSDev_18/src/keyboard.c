@@ -45,6 +45,7 @@ void KeyboardHandler(struct Registers* registers) {
         char ascii = scancodeToAscii[scancode];
 
         if (ascii != 0) {
+            TerminalPutChar(ascii);
             lastKeyPressed = ascii;
         }
     }

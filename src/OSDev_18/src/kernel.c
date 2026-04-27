@@ -9,6 +9,7 @@
 #include <songApp/song.h>
 #include <songApp/frequencies.h>
 #include <snakeApp/snake.h>
+#include <pianoApp/piano.h>
 
 extern uint32_t end;
 
@@ -39,6 +40,9 @@ void PlayMusic(void) {
 
 void main(void) {
     TerminalInitialize();
+
+    TerminalWriteString("Hello World (TerminalWriteString)\n");
+
     GdtInitialize();
     IdtInitialize();
     PitInitialize();
@@ -50,19 +54,32 @@ void main(void) {
     PrintMemoryLayout();
 
     while (1) {
-        TerminalClear();
-        TerminalWriteString("Enter application number (0 for music, 1 for snake): ");
+        TerminalWriteString("Enter application number:\n");
+        TerminalWriteString("0. Play Music\n");
+        TerminalWriteString("1. Play Snake\n");
+        TerminalWriteString("2. Play Piano\n");
         char input = TerminalGetChar();
 
         switch (input) {
             case '0':
+                TerminalClear();
                 PlayMusic();
+                TerminalClear();
                 break;
             case '1':
+                TerminalClear();
                 PlayGame();
+                TerminalClear();
+                break;
+            case '2':
+                TerminalClear();
+                PlayPiano();
+                TerminalClear();
                 break;
             default:
-                TerminalWriteString("Invalid application number.\n");
+                TerminalWriteString("\nInvalid application number.\n");
+                SleepInterrupt(1000);
+                TerminalClear();
                 break;
         }
     }

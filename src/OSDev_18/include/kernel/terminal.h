@@ -37,5 +37,6 @@ void TerminalWriteString(const char* data);
 void TerminalWriteUInt(uint32_t num);
 void TerminalWriteHex(uint32_t memory);
 char TerminalGetChar(void);
+int TerminalGetUInt(uint32_t *number);
 
 #endif

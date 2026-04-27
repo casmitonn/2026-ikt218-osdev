@@ -3,6 +3,7 @@
 #include <kernel/io.h>
 #include <kernel/keyboard.h>
 #include <kernel/pit.h>
+#include <libc/limits.h>
 
 const size_t VGA_HEIGHT = 25;
 const size_t VGA_WIDTH = 80;
@@ -151,4 +152,35 @@ char TerminalGetChar(void) {
 
         SleepInterrupt(100);
     }
+}
+
+int TerminalGetUInt(uint32_t *number) {
+    uint32_t num = 0;
+    int nextIndex = 0;
+    char key = 0;
+    int error = 0;
+
+    do {
+        key = GetLastKeyPressed();
+
+        if (key >= '0' && key <= '9') {
+            uint32_t digit = key - '0';
+
+            if (num <= (UINT32_MAX - digit) / 10) {
+                num = num * 10 + digit;
+                nextIndex++;
+            } else {
+                error = 1;
+            }
+        } else if (key != 0 && key != '\n') {
+            error = 1;
+        }
+
+        SleepInterrupt(100);
+    } while (key != 10 && nextIndex < 10);
+
+    if (error) return 0;
+
+    *number = num;
+    return 1;
 }
