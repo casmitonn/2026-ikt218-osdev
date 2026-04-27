@@ -31,6 +31,14 @@ void main(uint32_t mb_magic, void* mb_info) {
     __asm__ volatile ("sti"); //enable interrupts after PIC is remapped
 
     printf("Hello World\n");
+
+    SongPlayer* player = create_song_player();
+    Song demo_song = { music_1, sizeof(music_1) / sizeof(Note) };
+    printf("Playing demo song...\n");
+    player->play_song(&demo_song);
+    printf("Finished playing the song.\n");
+    free(player);
+
     printf("Starting Snake Game...\n");
     sleep_interrupt(1000);
 
